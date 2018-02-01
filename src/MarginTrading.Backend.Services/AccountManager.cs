@@ -164,7 +164,8 @@ namespace MarginTrading.Backend.Services
             if (account.Balance > 0)
                 throw new Exception(
                     $"Account [{accountId}] balance is higher than zero: [{account.Balance}]");
-            
+
+            await _clientAccountClient.DeleteWalletAsync(accountId);
             await _repository.DeleteAsync(clientId, accountId);
             await ProcessAccountsSetChange(clientId);
             await _rabbitMqNotifyService.AccountDeleted(account);
@@ -352,7 +353,7 @@ namespace MarginTrading.Backend.Services
         private async Task<MarginTradingAccount> CreateAccountAndWalletAsync(string clientId, string baseAssetId, string tradingConditionId)
         {
             var wallet = await _clientAccountClient.CreateWalletAsync(clientId, WalletType.Trading, OwnerType.Mt,
-                LegalEntityType.Uk, "MarginWallet", null);
+                LegalEntityType.Uk, $"{baseAssetId} margin wallet", null);
             
             return CreateAccount(wallet.Id, clientId, baseAssetId, tradingConditionId);
         }
