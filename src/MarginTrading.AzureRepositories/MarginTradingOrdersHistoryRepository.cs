@@ -31,6 +31,7 @@ namespace MarginTrading.AzureRepositories
         decimal IOrderHistory.ClosePrice => (decimal) ClosePrice;
         public double ClosePrice { get; set; }
         decimal IOrderHistory.CloseCrossPrice => (decimal) CloseCrossPrice;
+        public OrderUpdateType OrderUpdateType { get; set; }
         public double CloseCrossPrice { get; set; }
         decimal IOrderHistory.Volume => (decimal) Volume;
         public double Volume { get; set; }
@@ -140,7 +141,8 @@ namespace MarginTrading.AzureRepositories
                 EquivalentAsset = src.EquivalentAsset,
                 OpenPriceEquivalent = (double) src.OpenPriceEquivalent,
                 ClosePriceEquivalent = (double) src.ClosePriceEquivalent,
-                Comment = src.Comment
+                Comment = src.Comment,
+                OrderUpdateType = src.OrderUpdateType,
             };
         }
     }
