@@ -207,7 +207,6 @@ namespace MarginTrading.Backend.Services
             _orderActivatedEventChannel.SendEvent(this, new OrderActivatedEventArgs(order));
         }
 
-        //TODO: do check in other way??
         private void CheckIfWeCanOpenPosition(Order order, MatchedOrderCollection matchedOrders)
         {
             var accountAsset = _accountAssetsCacheService.GetAccountAsset(order.TradingConditionId, order.AccountAssetId, order.Instrument);
@@ -227,7 +226,8 @@ namespace MarginTrading.Backend.Services
                 return false;
             });
 
-            var guessAccount = _accountUpdateService.GuessAccountWithOrder(order);
+            //TODO: very strange check.. think about it one more time
+            var guessAccount = _accountUpdateService.GuessAccountWithNewActiveOrder(order);
             var guessAccountLevel = guessAccount.GetAccountLevel();
 
             if (guessAccountLevel != AccountLevel.None)
@@ -364,6 +364,16 @@ namespace MarginTrading.Backend.Services
 
         private void CommitStopout(MarginTradingAccount account)
         {
+            var pendingOrders = _ordersCache.WaitingForExecutionOrders.GetOrdersByAccountIds(account.Id);
+
+            var cancelledPendingOrders = new List<Order>();
+            
+            foreach (var pendingOrder in pendingOrders)
+            {
+                cancelledPendingOrders.Add(pendingOrder);
+                CancelPendingOrder(pendingOrder.Id, OrderCloseReason.StopOut);
+            }
+            
             var activeOrders = _ordersCache.ActiveOrders.GetOrdersByAccountIds(account.Id);
             
             var ordersToClose = new List<Order>();
@@ -379,10 +389,11 @@ namespace MarginTrading.Backend.Services
                 newAccountUsedMargin -= order.GetMarginMaintenance();
             }
 
-            if (!ordersToClose.Any())
+            if (!ordersToClose.Any() && !cancelledPendingOrders.Any())
                 return;
-            
-            _stopoutEventChannel.SendEvent(this, new StopOutEventArgs(account, ordersToClose.ToArray()));
+
+            _stopoutEventChannel.SendEvent(this,
+                new StopOutEventArgs(account, ordersToClose.Concat(cancelledPendingOrders).ToArray()));
 
             foreach (var order in ordersToClose)
                 SetOrderToClosingState(order, OrderCloseReason.StopOut);
