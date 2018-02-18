@@ -118,7 +118,7 @@ namespace MarginTrading.Backend.Services.Modules
 				.SingleInstance();
 
 			builder.RegisterType<MarketMakerService>()
-				.As<IFeedConsumer>()
+				.AsSelf()
 				.SingleInstance();
 
 			builder.RegisterType<MicrographCacheService>()
