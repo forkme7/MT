@@ -13,6 +13,7 @@ using MarginTrading.Backend.Services.EventsConsumers;
 using MarginTrading.Backend.Services.Infrastructure;
 using MarginTrading.Backend.Services.MatchingEngines;
 using MarginTrading.Backend.Services.Quotes;
+using MarginTrading.Backend.Services.Stp;
 using MarginTrading.Backend.Services.TradingConditions;
 using MarginTrading.Common.RabbitMq;
 using MarginTrading.Common.Services.Client;
@@ -75,8 +76,14 @@ namespace MarginTrading.Backend.Services.Modules
 				.As<IClientAccountService>()
 				.SingleInstance();
 
-			builder.RegisterType<InternalMatchingEngine>()
-				.As<IInternalMatchingEngine>()
+			builder.RegisterType<MarketMakerMatchingEngine>()
+				.As<IMarketMakerMatchingEngine>()
+				.WithParameter(TypedParameter.From(MatchingEngineConstants.LykkeVuMm))
+				.SingleInstance();
+			
+			builder.RegisterType<StpMatchingEngine>()
+				.As<IStpMatchingEngine>()
+				.WithParameter(TypedParameter.From(MatchingEngineConstants.LykkeCyStp))
 				.SingleInstance();
 
 			builder.RegisterType<TradingEngine>()
@@ -118,9 +125,13 @@ namespace MarginTrading.Backend.Services.Modules
 			builder.RegisterType<OrderBookList>()
 				.AsSelf()
 				.SingleInstance();
+			
+			builder.RegisterType<ExternalOrderBooksList>()
+				.AsSelf()
+				.SingleInstance();
 
 			builder.RegisterType<MarketMakerService>()
-				.As<IFeedConsumer>()
+				.AsSelf()
 				.SingleInstance();
 
 			builder.RegisterType<MicrographCacheService>()
