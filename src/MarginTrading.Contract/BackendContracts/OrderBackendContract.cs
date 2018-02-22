@@ -31,5 +31,6 @@ namespace MarginTrading.Contract.BackendContracts
         public decimal OpenPriceEquivalent{ get; set; }
         public decimal ClosePriceEquivalent { get; set; }
 
+        public MatchingEngineModeContract MatchingEngineMode { get; set; }
     }
 }
