@@ -4,11 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Common.Log;
+using FluentScheduler;
 using Lykke.RabbitMqBroker.Subscriber;
 using MarginTrading.Backend.Core;
 using MarginTrading.Backend.Core.MarketMakerFeed;
 using MarginTrading.Backend.Core.MatchingEngines;
 using MarginTrading.Backend.Core.Settings;
+using MarginTrading.Backend.Scheduling;
 using MarginTrading.Backend.Services.Infrastructure;
 using MarginTrading.Backend.Services.MatchingEngines;
 using MarginTrading.Backend.Services.Notifications;
@@ -36,7 +38,8 @@ namespace MarginTrading.Backend
             IRabbitMqNotifyService rabbitMqNotifyService,
             IConsole consoleWriter,
             IEnumerable<IFeedConsumer> consumers,
-            ILog logger, MarginSettings marginSettings,
+            ILog logger, 
+            MarginSettings marginSettings,
             IMaintenanceModeService maintenanceModeService,
             IRabbitMqService rabbitMqService,
             MatchingEngineRoutesManager matchingEngineRoutesManager)
@@ -64,6 +67,10 @@ namespace MarginTrading.Backend
                 _rabbitMqService.Subscribe<MatchingEngineRouteRisksCommand>(_marginSettings.RisksRabbitMqSettings,
                     _marginSettings.Env, _matchingEngineRoutesManager.HandleRiskManagerCommand);
 
+                var registry = new Registry();
+                registry.Schedule<OvernightSwapJob>().ToRunEvery(0).Days().At(_marginSettings.OvernightSwapCalculationHour, 0);
+                JobManager.Initialize(registry);
+                JobManager.JobException += info => _logger.WriteError(ServiceName, nameof(JobManager), info.Exception);
             }
             catch (Exception ex)
             {
