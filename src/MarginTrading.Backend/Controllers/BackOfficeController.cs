@@ -43,6 +43,9 @@ namespace MarginTrading.Backend.Controllers
             MatchingEngineRoutesManager routesManager,
             IOrderReader ordersReader,
             MarginSettings marginSettings,
+            IMarginTradingOperationsLogService operationsLogService,
+            IConsole consoleWriter,
+            ILog log,
             IMarginTradingSettingsService marginTradingSettingsService,
             IMatchingEngineRepository meRepository)
         {
