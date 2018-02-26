@@ -9,6 +9,7 @@ using Lykke.Common.ApiLibrary.Swagger;
 using Lykke.Logs;
 using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
+using MarginTrading.Backend.Contracts.RabbitMqMessages;
 using MarginTrading.Common.Extensions;
 using MarginTrading.Common.Json;
 using MarginTrading.Common.Modules;
@@ -253,6 +254,14 @@ namespace MarginTrading.Frontend
 
             Subscribe<TradeContract>(rabbitMqService, settings.MarginTradingDemo.MtRabbitMqConnString,
                 settings.MarginTradingFront.RabbitMqQueues.Trades.ExchangeName, rabbitMqHandler.ProcessTrades);
+
+            Subscribe<MarginTradingEnabledChangedMessage>(rabbitMqService, settings.MarginTradingLive.MtRabbitMqConnString,
+                settings.MarginTradingFront.RabbitMqQueues.MarginTradingEnabledChanged.ExchangeName,
+                rabbitMqHandler.ProcessMarginTradingEnabledChanged);
+            
+            Subscribe<MarginTradingEnabledChangedMessage>(rabbitMqService, settings.MarginTradingDemo.MtRabbitMqConnString,
+                settings.MarginTradingFront.RabbitMqQueues.MarginTradingEnabledChanged.ExchangeName,
+                rabbitMqHandler.ProcessMarginTradingEnabledChanged);
         }
 
         private static void SetupLoggers(IServiceCollection services, IReloadingManager<ApplicationSettings> settings)

@@ -32,7 +32,7 @@ namespace MarginTrading.Backend.Controllers
         private readonly MatchingEngineRoutesManager _routesManager;
         private readonly IOrderReader _ordersReader;
         private readonly MarginSettings _marginSettings;
-        private readonly IMarginTradingSettingsService _marginTradingSettingsService;
+        private readonly IMarginTradingEnablingService _marginTradingEnablingService;
         private readonly IMatchingEngineRepository _meRepository;
 
         public BackOfficeController(
@@ -46,7 +46,7 @@ namespace MarginTrading.Backend.Controllers
             IMarginTradingOperationsLogService operationsLogService,
             IConsole consoleWriter,
             ILog log,
-            IMarginTradingSettingsService marginTradingSettingsService,
+            IMarginTradingEnablingService marginTradingEnablingService,
             IMatchingEngineRepository meRepository)
         {
             _assetPairsCache = assetPairsCache;
@@ -56,7 +56,7 @@ namespace MarginTrading.Backend.Controllers
             _routesManager = routesManager;
             _ordersReader = ordersReader;
             _marginSettings = marginSettings;
-            _marginTradingSettingsService = marginTradingSettingsService;
+            _marginTradingEnablingService = marginTradingEnablingService;
             _meRepository = meRepository;
         }
 
@@ -324,7 +324,7 @@ namespace MarginTrading.Backend.Controllers
         [SkipMarginTradingEnabledCheck]
         public async Task<IActionResult> SetMarginTradingIsEnabled(string clientId, [FromBody]bool enabled)
         {
-            await _marginTradingSettingsService.SetMarginTradingEnabled(clientId, _marginSettings.IsLive, enabled);
+            await _marginTradingEnablingService.SetMarginTradingEnabled(clientId, _marginSettings.IsLive, enabled);
             return Ok();
         }
 
