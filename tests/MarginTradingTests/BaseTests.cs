@@ -21,6 +21,7 @@ using MarginTrading.Backend.Services.Events;
 using MarginTrading.Backend.Services.MatchingEngines;
 using MarginTrading.Backend.Services.Modules;
 using MarginTrading.Backend.Services.TradingConditions;
+using MarginTrading.Common.RabbitMq;
 using MarginTrading.Common.Services;
 using MarginTrading.Common.Services.Settings;
 using MarginTradingTests.Helpers;
@@ -54,7 +55,14 @@ namespace MarginTradingTests
         {
             var builder = new ContainerBuilder();
 
-            builder.RegisterModule(new SettingsModule());
+            var marginSettings = new MarginSettings
+            {
+                RabbitMqQueues =
+                    new RabbitMqQueues {MarginTradingEnabledChanged = new RabbitMqQueueInfo {ExchangeName = ""}}
+            };
+
+            builder.RegisterInstance(marginSettings).SingleInstance();
+
             builder.RegisterModule(new MockBaseServicesModule());
             builder.RegisterModule(new MockRepositoriesModule(Accounts));
 
@@ -146,7 +154,7 @@ namespace MarginTradingTests
             builder.RegisterBuildCallback(c => c.Resolve<AccountAssetsManager>());
             builder.RegisterBuildCallback(c => c.Resolve<OrderCacheManager>());
             builder.RegisterInstance(new Mock<IMtSlackNotificationsSender>(MockBehavior.Loose).Object).SingleInstance();
-
+            builder.RegisterInstance(Mock.Of<IRabbitMqService>()).As<IRabbitMqService>();
             Container = builder.Build();
 
             MtServiceLocator.FplService = Container.Resolve<IFplService>();
