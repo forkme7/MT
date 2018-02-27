@@ -22,6 +22,7 @@ namespace MarginTradingTests.Services
         private IClientAccountClient _clientAccountsService;
         private MarginTradingEnabledChangedMessage _sentMessage;
         private IMarginTradingSettingsCacheService _marginTradingSettingsCacheService;
+        private MarginSettings _marginSettings;
 
         [SetUp]
         public void SetUp()
@@ -41,7 +42,7 @@ namespace MarginTradingTests.Services
                 s.GetProducer(expectedRabbitMqSettings.Equivalent(), false,
                     It.IsAny<IRabbitMqSerializer<MarginTradingEnabledChangedMessage>>()) ==
                 publisher);
-            var marginSettings = new MarginSettings
+            _marginSettings = new MarginSettings
             {
                 MtRabbitMqConnString = "conn str",
                 RabbitMqQueues = new RabbitMqQueues
@@ -51,7 +52,7 @@ namespace MarginTradingTests.Services
             };
 
             _marginTradingSettingsCacheService = Mock.Of<IMarginTradingSettingsCacheService>();
-            _sut = new MarginTradingEnablingService(_clientAccountsService, rabbitMqService, marginSettings,
+            _sut = new MarginTradingEnablingService(_clientAccountsService, rabbitMqService, _marginSettings,
                 _marginTradingSettingsCacheService);
             _sut.Start();
         }
@@ -59,6 +60,9 @@ namespace MarginTradingTests.Services
         [Test]
         public async Task Always_ShouldCorrectlyEnableDemo()
         {
+            // arrange
+            _marginSettings.IsLive = false; 
+            
             //act
             await _sut.SetMarginTradingEnabled("id of client", enabled: true);
 
@@ -77,6 +81,9 @@ namespace MarginTradingTests.Services
         [Test]
         public async Task Always_ShouldCorrectlyEnableLive()
         {
+            // arrange
+            _marginSettings.IsLive = true;
+            
             //act
             await _sut.SetMarginTradingEnabled("id of client", enabled: true);
 
