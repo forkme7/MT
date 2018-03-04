@@ -49,7 +49,7 @@ namespace MarginTradingTests.Modules
                 .Returns(() => Task.FromResult((IClientSession)new ClientSession { ClientId = "1" }));
 
             var volumeEquivalentService = new Mock<IVolumeEquivalentService>();
-            
+
             builder.RegisterInstance(emailService.Object).As<IEmailService>();
             builder.RegisterInstance(appNotifications.Object).As<IAppNotifications>();
             builder.RegisterInstance(appNotifications).As<Mock<IAppNotifications>>();

@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Common;
-using Common.Log;
 using MarginTrading.Backend.Attributes;
 using MarginTrading.Backend.Core;
 using MarginTrading.Backend.Core.Mappers;
@@ -13,8 +11,6 @@ using MarginTrading.Backend.Models;
 using MarginTrading.Backend.Services;
 using MarginTrading.Backend.Services.MatchingEngines;
 using MarginTrading.Common.Middleware;
-using MarginTrading.Common.Services;
-using MarginTrading.Common.Services.Settings;
 using MarginTrading.Contract.BackendContracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,34 +22,27 @@ namespace MarginTrading.Backend.Controllers
     [MiddlewareFilter(typeof(RequestLoggingPipeline))]
     public class BackOfficeController : Controller
     {
-        private readonly IAssetPairsCache _assetPairsCache;
         private readonly IAccountsCacheService _accountsCacheService;
         private readonly AccountManager _accountManager;
         private readonly MatchingEngineRoutesManager _routesManager;
         private readonly IOrderReader _ordersReader;
-        private readonly MarginSettings _marginSettings;
-        private readonly IMarginTradingSettingsService _marginTradingSettingsService;
+        private readonly IMarginTradingEnablingService _marginTradingEnablingService;
         private readonly IMatchingEngineRepository _meRepository;
 
         public BackOfficeController(
-            
-            IAssetPairsCache assetPairsCache,
             IAccountsCacheService accountsCacheService,
             AccountManager accountManager,
             MatchingEngineRoutesManager routesManager,
             IOrderReader ordersReader,
-            MarginSettings marginSettings,
-            IMarginTradingSettingsService marginTradingSettingsService,
-            IMatchingEngineRepository meRepository)
+            IMatchingEngineRepository meRepository,
+            IMarginTradingEnablingService marginTradingEnablingService)
         {
-            _assetPairsCache = assetPairsCache;
             _accountsCacheService = accountsCacheService;
 
             _accountManager = accountManager;
             _routesManager = routesManager;
             _ordersReader = ordersReader;
-            _marginSettings = marginSettings;
-            _marginTradingSettingsService = marginTradingSettingsService;
+            _marginTradingEnablingService = marginTradingEnablingService;
             _meRepository = meRepository;
         }
 
@@ -167,38 +156,6 @@ namespace MarginTrading.Backend.Controllers
             }
 
             return result;
-        }
-
-        #endregion
-
-
-        #region Dictionaries
-
-        [HttpGet]
-        [Route("instruments/getall")]
-        [ProducesResponseType(typeof(List<AssetPair>), 200)]
-        public IActionResult GetAllInstruments()
-        {
-            var instruments = _assetPairsCache.GetAll();
-            return Ok(instruments);
-        }
-
-        [HttpGet]
-        [Route("matchingengines")]
-        [ProducesResponseType(typeof(List<string>), 200)]
-        public IActionResult GetAllMatchingEngines()
-        {
-            var matchingEngines = _meRepository.GetMatchingEngines().Select(me => me.Id);
-            return Ok(matchingEngines);
-        }
-
-        [HttpGet]
-        [Route("orderTypes/getall")]
-        [ProducesResponseType(typeof(List<string>), 200)]
-        public IActionResult GetAllOrderTypes()
-        {
-            var orderTypes = Enum.GetNames(typeof(OrderDirection));
-            return Ok(orderTypes);
         }
 
         #endregion
@@ -321,7 +278,7 @@ namespace MarginTrading.Backend.Controllers
         [SkipMarginTradingEnabledCheck]
         public async Task<IActionResult> SetMarginTradingIsEnabled(string clientId, [FromBody]bool enabled)
         {
-            await _marginTradingSettingsService.SetMarginTradingEnabled(clientId, _marginSettings.IsLive, enabled);
+            await _marginTradingEnablingService.SetMarginTradingEnabled(clientId, enabled);
             return Ok();
         }
 

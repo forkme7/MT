@@ -140,8 +140,8 @@ namespace MarginTrading.Backend.Services.Modules
 				.AsSelf()
 				.SingleInstance();
 
-			builder.RegisterType<MarginTradingSettingsService>()
-				.As<IMarginTradingSettingsService>()
+			builder.RegisterType<MarginTradingEnabledCacheService>()
+				.As<IMarginTradingSettingsCacheService>()
 				.SingleInstance();
 
 			builder.RegisterType<MatchingEngineRouter>()
@@ -180,6 +180,11 @@ namespace MarginTrading.Backend.Services.Modules
 
 			builder.RegisterInstance(_riskInformingSettings)
 				.As<IReloadingManager<RiskInformingSettings>>()
+				.SingleInstance();
+			
+			builder.RegisterType<MarginTradingEnablingService>()
+				.As<IMarginTradingEnablingService>()
+				.As<IStartable>()
 				.SingleInstance();
 		}
 	}
