@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Common;
 using FluentAssertions;
+using Lykke.RabbitMqBroker.Publisher;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientAccount.Client.Models;
 using MarginTrading.Backend.Contracts.RabbitMqMessages;
@@ -19,7 +20,7 @@ namespace MarginTradingTests.Services
     {
         private MarginTradingEnablingService _sut;
         private IClientAccountClient _clientAccountsService;
-        private MarginTradingEnabledChangedMessage _sentMessage = null;
+        private MarginTradingEnabledChangedMessage _sentMessage;
         private IMarginTradingSettingsCacheService _marginTradingSettingsCacheService;
         private MarginSettings _marginSettings;
 
@@ -36,10 +37,10 @@ namespace MarginTradingTests.Services
             {
                 ConnectionString = "conn str",
                 ExchangeName = "exchange name",
-                IsDurable = false
             };
             var rabbitMqService = Mock.Of<IRabbitMqService>(s =>
-                s.CreateProducer<MarginTradingEnabledChangedMessage>(expectedRabbitMqSettings.Equivalent()) ==
+                s.GetProducer(expectedRabbitMqSettings.Equivalent(), false,
+                    It.IsAny<IRabbitMqSerializer<MarginTradingEnabledChangedMessage>>()) ==
                 publisher);
             _marginSettings = new MarginSettings
             {
