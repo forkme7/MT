@@ -109,6 +109,7 @@ namespace MarginTrading.Backend
             MtServiceLocator.AccountUpdateService = ApplicationContainer.Resolve<IAccountUpdateService>();
             MtServiceLocator.AccountsCacheService = ApplicationContainer.Resolve<IAccountsCacheService>();
             MtServiceLocator.SwapCommissionService = ApplicationContainer.Resolve<ICommissionService>();
+            MtServiceLocator.OvernightSwapService = ApplicationContainer.Resolve<IOvernightSwapService>();
 
             return new AutofacServiceProvider(ApplicationContainer);
         }
@@ -125,7 +126,7 @@ namespace MarginTrading.Backend
             app.UseSwaggerUi();
 
             appLifetime.ApplicationStopped.Register(() => ApplicationContainer.Dispose());
-
+            
             var application = app.ApplicationServices.GetService<Application>();
 
             var settings = app.ApplicationServices.GetService<MarginSettings>();
@@ -170,6 +171,7 @@ namespace MarginTrading.Backend
             builder.RegisterBuildCallback(c => c.Resolve<QuoteCacheService>());
             builder.RegisterBuildCallback(c => c.Resolve<OrderCacheManager>());
             builder.RegisterBuildCallback(c => c.Resolve<PendingOrdersCleaningService>());
+            builder.RegisterBuildCallback(c => c.Resolve<IOvernightSwapService>());
         }
 
         private static void SetupLoggers(IServiceCollection services, IReloadingManager<MtBackendSettings> mtSettings,
