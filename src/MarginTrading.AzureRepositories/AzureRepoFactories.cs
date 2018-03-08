@@ -1,9 +1,11 @@
 ﻿using AzureStorage.Tables;
 using Common.Log;
 using Lykke.SettingsReader;
+using MarginTrading.AzureRepositories.Contract;
 using MarginTrading.AzureRepositories.Entities;
 using MarginTrading.AzureRepositories.Logs;
 using MarginTrading.Backend.Core;
+using MarginTrading.Common.Services;
 
 namespace MarginTrading.AzureRepositories
 {
@@ -91,6 +93,14 @@ namespace MarginTrading.AzureRepositories
             public static IDayOffSettingsRepository CreateDayOffSettingsRepository(IReloadingManager<string> connString)
             {
                 return new DayOffSettingsRepository(new MarginTradingBlobRepository(connString));
+            }
+            
+            public static IAssetPairSettingsRepository CreateAssetPairSettingsRepository(IReloadingManager<string> connString, 
+                ILog log, IConvertService convertService)
+            {
+                return new AssetPairSettingsRepository(
+                    AzureTableStorage<AssetPairSettingsRepository.AssetPairSettingsEntity>.Create(connString,
+                        "AssetPairSettings", log), convertService);
             }
         }
     }

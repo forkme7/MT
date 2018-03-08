@@ -105,13 +105,6 @@ namespace MarginTrading.Backend
             builder.Populate(services);
             ApplicationContainer = builder.Build();
 
-            var meRepository = ApplicationContainer.Resolve<IMatchingEngineRepository>();
-            meRepository.InitMatchingEngines(new List<IMatchingEngineBase>
-            {
-                ApplicationContainer.Resolve<IInternalMatchingEngine>(),
-                new RejectMatchingEngine()
-            });
-
             MtServiceLocator.FplService = ApplicationContainer.Resolve<IFplService>();
             MtServiceLocator.AccountUpdateService = ApplicationContainer.Resolve<IAccountUpdateService>();
             MtServiceLocator.AccountsCacheService = ApplicationContainer.Resolve<IAccountsCacheService>();
@@ -161,7 +154,7 @@ namespace MarginTrading.Backend
             IReloadingManager<RiskInformingSettings> riskInformingSettings)
         {
             builder.RegisterModule(new BaseServicesModule(mtSettings.CurrentValue, LogLocator.CommonLog));
-            builder.RegisterModule(new BackendSettingsModule(mtSettings.CurrentValue, settings.CurrentValue));
+            builder.RegisterModule(new BackendSettingsModule(mtSettings.CurrentValue, settings));
             builder.RegisterModule(new BackendRepositoriesModule(settings, LogLocator.CommonLog));
             builder.RegisterModule(new EventModule());
             builder.RegisterModule(new CacheModule());
