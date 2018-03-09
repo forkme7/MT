@@ -65,7 +65,7 @@ namespace MarginTradingTests
 
             builder.RegisterModule(new MockBaseServicesModule());
             builder.RegisterModule(new MockRepositoriesModule(Accounts));
-
+            
             if (mockEvents)
             {
                 builder.RegisterModule(new MockEventModule());
@@ -153,6 +153,7 @@ namespace MarginTradingTests
 
             builder.RegisterBuildCallback(c => c.Resolve<AccountAssetsManager>());
             builder.RegisterBuildCallback(c => c.Resolve<OrderCacheManager>());
+            builder.RegisterBuildCallback(c => c.Resolve<IOvernightSwapService>());
             builder.RegisterInstance(new Mock<IMtSlackNotificationsSender>(MockBehavior.Loose).Object).SingleInstance();
             builder.RegisterInstance(Mock.Of<IRabbitMqService>()).As<IRabbitMqService>();
             Container = builder.Build();
@@ -161,6 +162,7 @@ namespace MarginTradingTests
             MtServiceLocator.AccountUpdateService = Container.Resolve<IAccountUpdateService>();
             MtServiceLocator.AccountsCacheService = Container.Resolve<IAccountsCacheService>();
             MtServiceLocator.SwapCommissionService = Container.Resolve<ICommissionService>();
+            MtServiceLocator.OvernightSwapService = Container.Resolve<IOvernightSwapService>();
 
             Container.Resolve<OrderBookList>().Init(null);
         }
