@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AsyncFriendlyStackTrace;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using MarginTrading.Backend.Contracts.AccountAssetPair;
 using MarginTrading.Backend.Contracts.AssetPairSettings;
 using MarginTrading.Backend.Contracts.Client;
 using MarginTrading.Backend.Contracts.DataReaderClient;
@@ -59,7 +60,7 @@ namespace MarginTrading.Backend.TestClient
             builder.Populate(services);
             var container = builder.Build();
             var client = container.Resolve<IMtBackendClient>();
-            
+
             await client.ScheduleSettings.ListExclusions().Dump();
             var excl = await client.ScheduleSettings.CreateExclusion(new DayOffExclusionInputContract
             {
@@ -91,7 +92,7 @@ namespace MarginTrading.Backend.TestClient
                 MultiplierMarkupAsk = 1.1m,
                 MatchingEngineMode = MatchingEngineModeContract.MarketMaker
             };
-            
+
             await client.AssetPairSettingsEdit.Delete("BTCUSD.test").Dump();
             var result = await client.AssetPairSettingsEdit.Insert("BTCUSD.test", assetPairSettingsInputContract).Dump();
             CheckAssetPairSettings(result, assetPairSettingsInputContract);
@@ -105,17 +106,17 @@ namespace MarginTrading.Backend.TestClient
             var list = await dataReaderClient.AssetPairSettingsRead.List().Dump();
             var ours = list.First(e => e.AssetPairId == "BTCUSD.test");
             CheckAssetPairSettings(ours, assetPairSettingsInputContract);
-            
+
             var get = await dataReaderClient.AssetPairSettingsRead.Get("BTCUSD.test").Dump();
             CheckAssetPairSettings(get, assetPairSettingsInputContract);
-            
+
             var nonexistentGet = await dataReaderClient.AssetPairSettingsRead.Get("nonexistent").Dump();
             nonexistentGet.RequiredEqualsTo(null, nameof(nonexistentGet));
-            
+
             var getByMode = await dataReaderClient.AssetPairSettingsRead.Get(MatchingEngineModeContract.Stp).Dump();
             var ours2 = getByMode.First(e => e.AssetPairId == "BTCUSD.test");
             CheckAssetPairSettings(ours2, assetPairSettingsInputContract);
-            
+
             var getByOtherMode = await dataReaderClient.AssetPairSettingsRead.Get(MatchingEngineModeContract.MarketMaker).Dump();
             getByOtherMode.Count(e => e.AssetPairId == "BTCUSD.test").RequiredEqualsTo(0, "getByOtherMode.Count");
 
@@ -124,7 +125,28 @@ namespace MarginTrading.Backend.TestClient
 
             var nonexistentDelete = await client.AssetPairSettingsEdit.Delete("nonexistent").Dump();
             nonexistentDelete.RequiredEqualsTo(null, nameof(nonexistentDelete));
-            
+
+            var accountAssetPairs = await dataReaderClient.AccountAssetPairsRead
+                .List()
+                .Dump();
+            var firstAccountAssetPair = accountAssetPairs.First();
+            var secondAccountAssetPair = await dataReaderClient.AccountAssetPairsRead
+                .Get(firstAccountAssetPair.TradingConditionId, firstAccountAssetPair.BaseAssetId, firstAccountAssetPair.Instrument)
+                .Dump();
+            CheckAccountAssetPairs(firstAccountAssetPair, secondAccountAssetPair);
+
+            var accountAssetPairsGetByTradingCondition = await dataReaderClient.AccountAssetPairsRead
+                .Get(firstAccountAssetPair.TradingConditionId, firstAccountAssetPair.BaseAssetId)
+                .Dump();
+            foreach (var accountAssetPair in accountAssetPairsGetByTradingCondition)
+            {
+                var item = accountAssetPairs
+                    .Where(x => x.TradingConditionId == accountAssetPair.TradingConditionId
+                    && x.BaseAssetId == accountAssetPair.BaseAssetId
+                    && x.Instrument == accountAssetPair.Instrument)
+                    .Single();
+                CheckAccountAssetPairs(item, accountAssetPair);
+            }
             Console.WriteLine("Successfuly finished");
         }
 
@@ -140,6 +162,26 @@ namespace MarginTrading.Backend.TestClient
                 nameof(actual.MultiplierMarkupAsk));
             actual.MatchingEngineMode.RequiredEqualsTo(expected.MatchingEngineMode,
                 nameof(actual.MatchingEngineMode));
+        }
+        private static void CheckAccountAssetPairs(AccountAssetPairContract actual,
+           AccountAssetPairContract expected)
+        {
+            actual.BaseAssetId.RequiredEqualsTo(expected.BaseAssetId, nameof(actual.BaseAssetId));
+            actual.CommissionLong.RequiredEqualsTo(expected.CommissionLong, nameof(actual.CommissionLong));
+            actual.CommissionLot.RequiredEqualsTo(expected.CommissionLot, nameof(actual.CommissionLot));
+            actual.CommissionShort.RequiredEqualsTo(expected.CommissionShort, nameof(actual.CommissionShort));
+            actual.DealLimit.RequiredEqualsTo(expected.DealLimit, nameof(actual.DealLimit));
+            actual.DeltaAsk.RequiredEqualsTo(expected.DeltaAsk, nameof(actual.DeltaAsk));
+            actual.DeltaBid.RequiredEqualsTo(expected.DeltaBid, nameof(actual.DeltaBid));
+            actual.Instrument.RequiredEqualsTo(expected.Instrument, nameof(actual.Instrument));
+            actual.LeverageInit.RequiredEqualsTo(expected.LeverageInit, nameof(actual.LeverageInit));
+            actual.LeverageMaintenance.RequiredEqualsTo(expected.LeverageMaintenance, nameof(actual.LeverageMaintenance));
+            actual.OvernightSwapLong.RequiredEqualsTo(expected.OvernightSwapLong, nameof(actual.OvernightSwapLong));
+            actual.OvernightSwapShort.RequiredEqualsTo(expected.OvernightSwapShort, nameof(actual.OvernightSwapShort));
+            actual.PositionLimit.RequiredEqualsTo(expected.PositionLimit, nameof(actual.PositionLimit));
+            actual.SwapLong.RequiredEqualsTo(expected.SwapLong, nameof(actual.SwapLong));
+            actual.SwapShort.RequiredEqualsTo(expected.SwapShort, nameof(actual.SwapShort));
+            actual.TradingConditionId.RequiredEqualsTo(expected.TradingConditionId, nameof(actual.TradingConditionId));
         }
 
         public static T Dump<T>(this T o)
