@@ -100,6 +100,7 @@ namespace MarginTrading.Backend.TestClient
             assetPairSettingsInputContract.MatchingEngineMode = MatchingEngineModeContract.Stp;
             var result2 = await client.AssetPairSettingsEdit.Update("BTCUSD.test", assetPairSettingsInputContract).Dump();
             CheckAssetPairSettings(result2, assetPairSettingsInputContract);
+                        
 
             var dataReaderClient = container.Resolve<IMtDataReaderClient>();
 
@@ -147,6 +148,11 @@ namespace MarginTrading.Backend.TestClient
                     .Single();
                 CheckAccountAssetPairs(item, accountAssetPair);
             }
+
+            firstAccountAssetPair.OvernightSwapLong = 0.1m;
+            var updatedAccountAssetPair = await client.TradingConditionsEdit.InsertOrUpdateAccountAsset(firstAccountAssetPair);
+            CheckAccountAssetPairs(updatedAccountAssetPair.Result, firstAccountAssetPair);
+
             Console.WriteLine("Successfuly finished");
         }
 
