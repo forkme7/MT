@@ -257,11 +257,11 @@ namespace MarginTrading.Frontend
 
             Subscribe<MarginTradingEnabledChangedMessage>(rabbitMqService, settings.MarginTradingLive.MtRabbitMqConnString,
                 settings.MarginTradingFront.RabbitMqQueues.MarginTradingEnabledChanged.ExchangeName,
-                settings.MarginTradingFront.Env, rabbitMqHandler.ProcessMarginTradingEnabledChanged);
+                rabbitMqHandler.ProcessMarginTradingEnabledChanged);
             
             Subscribe<MarginTradingEnabledChangedMessage>(rabbitMqService, settings.MarginTradingDemo.MtRabbitMqConnString,
                 settings.MarginTradingFront.RabbitMqQueues.MarginTradingEnabledChanged.ExchangeName,
-                settings.MarginTradingFront.Env, rabbitMqHandler.ProcessMarginTradingEnabledChanged);
+                rabbitMqHandler.ProcessMarginTradingEnabledChanged);
         }
 
         private static void SetupLoggers(IServiceCollection services, IReloadingManager<ApplicationSettings> settings)
