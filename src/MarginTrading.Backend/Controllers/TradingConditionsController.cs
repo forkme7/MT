@@ -1,22 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using MarginTrading.Backend.Contracts;
 using MarginTrading.Backend.Contracts.AccountAssetPair;
 using MarginTrading.Backend.Contracts.Common;
 using MarginTrading.Backend.Contracts.TradingConditions;
-using MarginTrading.Backend.Core.Mappers;
 using MarginTrading.Backend.Core.TradingConditions;
 using MarginTrading.Backend.Services.TradingConditions;
 using MarginTrading.Common.Middleware;
 using MarginTrading.Common.Services;
-using MarginTrading.Contract.BackendContracts;
-using MarginTrading.Contract.BackendContracts.TradingConditions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.SwaggerGen.Annotations;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace MarginTrading.Backend.Controllers
 {
@@ -75,40 +72,27 @@ namespace MarginTrading.Backend.Controllers
                     model.Instruments);
 
                 return BackendResponse<List<AccountAssetPairContract>>.Ok(
-                    assetPairs.Select(a => Convert(a)));
+                    assetPairs.Select(a => Convert(a))
+                    .ToList());
             }
             catch (Exception ex)
             {
                 return BackendResponse<List<AccountAssetPairContract>>.Error(ex.Message);
             }
-
-            //try
-            //{
-            //    var assetPairs = await _accountAssetsManager.AssignInstruments(model.TradingConditionId, model.BaseAssetId,
-            //        model.Instruments);
-                
-            //    return MtBackendResponse<IEnumerable<AccountAssetPairModel>>.Ok(
-            //        assetPairs.Select(a => a.ToBackendContract()));
-            //}
-            //catch (Exception e)
-            //{
-            //    return MtBackendResponse<IEnumerable<AccountAssetPairModel>>.Error(e.Message);
-            //}
         }
 
         [HttpPost]
         [Route("accountAssets")]
         [SwaggerOperation("AddOrReplaceAccountAsset")]
-        public async Task<MtBackendResponse<AccountAssetPairModel>> AddOrReplaceAccountAsset([FromBody]AccountAssetPairModel model)
+        public async Task<BackendResponse<AccountAssetPairContract>> InsertOrUpdateAccountAsset([FromBody]AccountAssetPairContract model)
         {
-            var assetPair = await _accountAssetsManager.AddOrReplaceAccountAssetAsync(model.ToDomainContract());
-
-            return MtBackendResponse<AccountAssetPairModel>.Ok(assetPair.ToBackendContract());
+            var assetPair = await _accountAssetsManager.AddOrReplaceAccountAssetAsync(Convert(model));
+            return BackendResponse<AccountAssetPairContract>.Ok(Convert(assetPair));
         }
 
         private ITradingCondition Convert(TradingConditionContract tradingCondition)
         {
-            return _convertService.Convert<TradingConditionContract, ITradingCondition>(tradingCondition);
+            return _convertService.Convert<TradingConditionContract, TradingCondition>(tradingCondition);
         }
         private TradingConditionContract Convert([CanBeNull] ITradingCondition tradingCondition)
         {
@@ -121,7 +105,7 @@ namespace MarginTrading.Backend.Controllers
 
         private IAccountGroup Convert(AccountGroupContract accountGroup)
         {
-            return _convertService.Convert<AccountGroupContract, IAccountGroup>(accountGroup);
+            return _convertService.Convert<AccountGroupContract, AccountGroup>(accountGroup);
         }
         private AccountGroupContract Convert([CanBeNull] IAccountGroup accountGroup)
         {
@@ -130,6 +114,15 @@ namespace MarginTrading.Backend.Controllers
                 return null;
             }
             return _convertService.Convert<IAccountGroup, AccountGroupContract>(accountGroup);
+        }
+
+        private AccountAssetPairContract Convert(IAccountAssetPair accountAssetPair)
+        {
+            return _convertService.Convert<IAccountAssetPair, AccountAssetPairContract>(accountAssetPair);
+        }
+        private IAccountAssetPair Convert(AccountAssetPairContract accountAssetPair)
+        {
+            return _convertService.Convert<AccountAssetPairContract, AccountAssetPair>(accountAssetPair);
         }
     }
 }
