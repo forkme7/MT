@@ -150,9 +150,49 @@ namespace MarginTrading.Backend.TestClient
             }
 
             firstAccountAssetPair.OvernightSwapLong = 0.1m;
-            var updatedAccountAssetPair = await client.TradingConditionsEdit.InsertOrUpdateAccountAsset(firstAccountAssetPair);
+            var updatedAccountAssetPair = await client.TradingConditionsEdit.InsertOrUpdateAccountAsset(firstAccountAssetPair)
+                .Dump();
             CheckAccountAssetPairs(updatedAccountAssetPair.Result, firstAccountAssetPair);
 
+            var tc = await client.TradingConditionsEdit.InsertOrUpdate(new Contracts.TradingConditions.TradingConditionContract
+            {
+                Id = "LYKKETEST",
+                IsDefault = false,
+                Name = "Test Trading Condition" 
+            })
+            .Dump();
+            tc.Result.Id.RequiredEqualsTo("LYKKETEST", "tc.Result.Id");
+
+            var ag = await client.TradingConditionsEdit.InsertOrUpdateAccountGroup(new Contracts.TradingConditions.AccountGroupContract
+            {
+                BaseAssetId="BTC",                
+                TradingConditionId = tc.Result.Id,
+                DepositTransferLimit = 0.1m,
+                ProfitWithdrawalLimit = 0.2m,
+                MarginCall = 0.3m,
+                StopOut = 0.4m
+            })
+            .Dump();
+            ag.Result.StopOut.RequiredEqualsTo(0.4m, "ag.Result.StopOut");
+
+            var aa = await client.TradingConditionsEdit.InsertOrUpdateAccountAsset(new AccountAssetPairContract
+            {
+                Instrument = "TSTLKK",
+                BaseAssetId = "BTC",
+                TradingConditionId = tc.Result.Id
+            })
+           .Dump();
+            aa.Result.Instrument.RequiredEqualsTo("TSTLKK", "aa.Result.Instrument");
+
+            var ai = await client.TradingConditionsEdit.AssignInstruments(new Contracts.TradingConditions.AssignInstrumentsContract
+            {
+                BaseAssetId= "BTC",
+                TradingConditionId = tc.Result.Id,
+                Instruments = new string[] { "TSTLKK" }
+            })
+            .Dump();
+
+            ai.IsOk.RequiredEqualsTo(true, "ai.IsOk");
             Console.WriteLine("Successfuly finished");
         }
 
