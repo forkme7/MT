@@ -193,6 +193,11 @@ namespace MarginTrading.Backend.TestClient
             .Dump();
 
             ai.IsOk.RequiredEqualsTo(true, "ai.IsOk");
+            
+            var tclist = await dataReaderClient.TradingConditionsRead.List().Dump();
+            await dataReaderClient.TradingConditionsRead.Get(tclist.First().Id).Dump();
+            
+
             Console.WriteLine("Successfuly finished");
         }
 
