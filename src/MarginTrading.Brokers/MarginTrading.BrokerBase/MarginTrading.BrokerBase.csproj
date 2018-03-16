@@ -21,6 +21,7 @@
     <PackageReference Include="microsoft.extensions.logging.debug" Version="2.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\MarginTrading.Backend.Services\MarginTrading.Backend.Services.csproj" />
     <ProjectReference Include="..\..\MarginTrading.Common\MarginTrading.Common.csproj" />
   </ItemGroup>
 </Project>
