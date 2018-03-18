@@ -68,7 +68,7 @@ namespace MarginTrading.MigrateApp
                 .Where(a => a.LegalEntity == null)
                 .GroupBy(a => a.PartitionKey)
                 .SelectMany(g => g.Batch(500))
-                .Select(batch => repository.InsertOrMergeBatchAsync(batch.Pipe(a => a.LegalEntity = "LYKKEVA")));
+                .Select(batch => repository.InsertOrMergeBatchAsync(batch.Pipe(a => a.LegalEntity = "LYKKEVU")));
             await Task.WhenAll(tasks);
         }
 
@@ -80,7 +80,7 @@ namespace MarginTrading.MigrateApp
             var tasks = (await repository.GetDataAsync())
                 .Where(a => a.LegalEntity == null)
                 .Batch(500)
-                .Select(batch => repository.InsertOrMergeBatchAsync(batch.Pipe(a => a.LegalEntity = "LYKKEVA")));
+                .Select(batch => repository.InsertOrMergeBatchAsync(batch.Pipe(a => a.LegalEntity = "LYKKEVU")));
             await Task.WhenAll(tasks);
         }
 
@@ -93,7 +93,7 @@ namespace MarginTrading.MigrateApp
                 .Where(a => a.LegalEntity == null)
                 .GroupBy(a => a.PartitionKey)
                 .SelectMany(g => g.Batch(500))
-                .Select(batch => repository.InsertOrMergeBatchAsync(batch.Pipe(a => a.LegalEntity = "LYKKEVA")));
+                .Select(batch => repository.InsertOrMergeBatchAsync(batch.Pipe(a => a.LegalEntity = "LYKKEVU")));
             await Task.WhenAll(tasks);
         }
 
@@ -106,7 +106,7 @@ namespace MarginTrading.MigrateApp
                 .Where(a => a.LegalEntity == null)
                 .GroupBy(a => a.PartitionKey)
                 .SelectMany(g => g.Batch(500))
-                .Select(batch => repository.InsertOrMergeBatchAsync(batch.Pipe(a => a.LegalEntity = "LYKKEVA")));
+                .Select(batch => repository.InsertOrMergeBatchAsync(batch.Pipe(a => a.LegalEntity = "LYKKEVU")));
             await Task.WhenAll(tasks);
         }
     }
