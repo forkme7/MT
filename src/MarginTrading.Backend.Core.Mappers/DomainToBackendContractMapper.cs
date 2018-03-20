@@ -103,7 +103,8 @@ namespace MarginTrading.Backend.Core.Mappers
                 WithdrawTransferLimit = src.WithdrawTransferLimit,
                 Comment = src.Comment,
                 Type = src.Type.ToType<AccountHistoryTypeContract>(),
-                OrderId = src.OrderId
+                OrderId = src.OrderId,
+                AuditLog = src.AuditLog
             };
         }
 

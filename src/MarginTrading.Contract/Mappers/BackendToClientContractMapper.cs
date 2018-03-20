@@ -143,7 +143,8 @@ namespace MarginTrading.Contract.Mappers
                 Balance = src.Balance,
                 WithdrawTransferLimit = src.WithdrawTransferLimit,
                 Comment = src.Comment,
-                Type = src.Type
+                Type = src.Type,
+                
             };
         }
 
